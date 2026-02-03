@@ -1,0 +1,10 @@
+{
+  "name": "react-nest-15-days",
+  "private": true,
+  "scripts": {
+    "start:dev": "npm run start:dev --prefix students-api-project/students-api",
+    "start": "npm run start --prefix students-api-project/students-api",
+    "build": "npm run build --prefix students-api-project/students-api",
+    "migration:run": "npm run migration:run --prefix students-api-project/students-api"
+  }
+}

@@ -22,6 +22,11 @@ export class StudentsController {
     return this.studentsService.findAll();
   }
 
+  @Get('all') // GET /api/students/all
+  allWithPath() {
+    return this.studentsService.findAll();
+  }
+
   @Get('passed') // GET /api/students/passed?minGrade=60
   passed(@Query('minGrade') minGrade?: string) {
     const mg = minGrade ? Number(minGrade) : 50;
@@ -30,7 +35,7 @@ export class StudentsController {
 
   @Get('averagegrade') // GET /api/students/averagegrade
   averageGrade() {
-    return { average: this.studentsService.averageGrade() };
+    return this.studentsService.averageGrade().then((average) => ({ average }));
   }
 
   @Get(':id') // GET /api/students/:id
@@ -39,8 +44,8 @@ export class StudentsController {
   }
 
   @Delete(':id') // DELETE /api/students/:id
-  remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
-    this.studentsService.remove(id);
+  async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
+    await this.studentsService.remove(id);
     return { deleted: true };
   }
 
