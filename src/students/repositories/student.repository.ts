@@ -57,4 +57,14 @@ export class StudentRepository implements IStudentRepository {
     const avg = result?.avg ? parseFloat(result.avg) : 0;
     return Math.round(avg * 100) / 100;
   }
+
+  async seedIfEmpty(data: Partial<StudentEntity>[]): Promise<void> {
+    const count = await this.ormRepository.count();
+    if (count > 0) return;
+
+    for (const row of data) {
+      const entity = this.ormRepository.create(row);
+      await this.ormRepository.save(entity);
+    }
+  }
 }

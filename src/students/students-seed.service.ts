@@ -11,12 +11,6 @@ export class StudentsSeedService implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    const count = await this.repository.count();
-    if (count > 0) return;
-
-    for (const row of studentsSeedData) {
-      const entity = this.repository.create(row);
-      await this.repository.save(entity);
-    }
+    await this.repository.seedIfEmpty(studentsSeedData);
   }
 }

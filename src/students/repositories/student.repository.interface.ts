@@ -10,6 +10,8 @@ export interface IStudentRepository {
   count(): Promise<number>;
   findWithGradeGreaterOrEqual(minGrade: number): Promise<StudentEntity[]>;
   getAverageGrade(): Promise<number>;
+  /** Inserts all items only when the table is empty; no-op otherwise. */
+  seedIfEmpty(data: Partial<StudentEntity>[]): Promise<void>;
 }
 
 export const STUDENT_REPOSITORY = Symbol('STUDENT_REPOSITORY');
