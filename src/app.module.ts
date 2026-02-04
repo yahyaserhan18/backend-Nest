@@ -1,8 +1,10 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { CommonModule } from './common/common.module';
+import { TraceIdMiddleware } from './middleware/trace-id.middleware';
 import { StudentsModule } from './students/students.module';
 
 @Module({
@@ -22,9 +24,14 @@ import { StudentsModule } from './students/students.module';
       }),
       inject: [ConfigService],
     }),
+    CommonModule,
     StudentsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TraceIdMiddleware],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(TraceIdMiddleware).forRoutes('*');
+  }
+}

@@ -1,4 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { TraceLoggerService } from '../common/trace-logger.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { UpdateStudentDto } from './dto/update-student.dto';
 import { StudentEntity } from './entities/student.entity';
@@ -9,6 +10,7 @@ export class StudentsService {
   constructor(
     @Inject(STUDENT_REPOSITORY)
     private readonly repository: IStudentRepository,
+    private readonly traceLogger: TraceLoggerService,
   ) {}
 
   async create(dto: CreateStudentDto): Promise<StudentEntity> {
@@ -28,6 +30,7 @@ export class StudentsService {
   async findById(id: string): Promise<StudentEntity> {
     const entity = await this.repository.findOneBy({ id });
     if (!entity) {
+      this.traceLogger.warn(`Student not found: ${id}`);
       throw new NotFoundException(`Student ${id} not found`);
     }
     return entity;
