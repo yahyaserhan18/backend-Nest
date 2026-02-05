@@ -1,11 +1,11 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { envValidationSchema } from './config/env.validation';
 import { CommonModule } from './common/common.module';
 import { TraceIdMiddleware } from './middleware/trace-id.middleware';
+import { PrismaModule } from './prisma/prisma.module';
 import { StudentsModule } from './students/students.module';
 
 @Module({
@@ -20,27 +20,7 @@ import { StudentsModule } from './students/students.module';
         convert: true,
       },
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => {
-        const databaseUrl = configService.get<string>('DATABASE_URL');
-        return {
-          type: 'postgres' as const,
-          ...(databaseUrl
-            ? { url: databaseUrl }
-            : {
-                host: configService.get<string>('DB_HOST'),
-                port: parseInt(configService.get<string>('DB_PORT')!, 10),
-                username: configService.get<string>('DB_USERNAME'),
-                password: configService.get<string>('DB_PASSWORD'),
-                database: configService.get<string>('DB_NAME'),
-              }),
-          autoLoadEntities: true,
-          synchronize: false,
-        };
-      },
-      inject: [ConfigService],
-    }),
+    PrismaModule,
     CommonModule,
     StudentsModule,
   ],
@@ -49,6 +29,6 @@ import { StudentsModule } from './students/students.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
-    consumer.apply(TraceIdMiddleware).forRoutes('*');
+    consumer.apply(TraceIdMiddleware).forRoutes('*path');
   }
 }

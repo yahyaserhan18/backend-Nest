@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "node scripts/ensure-database-url.js generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -18,9 +18,9 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "node ./node_modules/typeorm/cli.js",
-    "migration:generate": "npm run build && npm run typeorm -- migration:generate ./src/migrations/Migration -d ./dist/data-source.js",
-    "migration:run": "npm run build && npm run typeorm -- migration:run -d ./dist/data-source.js"
+    "prisma:generate": "node scripts/ensure-database-url.js generate",
+    "migration:deploy": "node scripts/migrate-deploy.js",
+    "migration:dev": "prisma migrate dev"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
@@ -28,15 +28,16 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/mapped-types": "^2.1.0",
     "@nestjs/platform-express": "^11.0.1",
-    "@nestjs/typeorm": "^11.0.0",
+    "@prisma/adapter-pg": "^7.3.0",
+    "@prisma/client": "^7.3.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.3",
     "dotenv": "^16.4.5",
     "joi": "^17.13.3",
     "pg": "^8.13.0",
+    "prisma": "^7.3.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1",
-    "typeorm": "^0.3.20"
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

@@ -1,0 +1,19 @@
+// Prisma schema - uses DATABASE_URL from env, or set it from DB_HOST/DB_PORT/DB_USERNAME/DB_PASSWORD/DB_NAME
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Student {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name      String   @db.VarChar(255)
+  age       Int
+  grade     Int
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+
+  @@map("students")
+}

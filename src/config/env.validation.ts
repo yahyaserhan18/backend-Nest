@@ -1,9 +1,10 @@
 import * as Joi from 'joi';
 
+// Empty DATABASE_URL is treated as "not set" (fallback to DB_*)
 const hasDatabaseUrl = Joi.string().min(1);
 
 export const envValidationSchema = Joi.object({
-  // Database: either DATABASE_URL or all of DB_HOST, DB_USERNAME, DB_PASSWORD, DB_NAME
+  // Database: either DATABASE_URL (non-empty) or all of DB_HOST, DB_PORT, DB_USERNAME, DB_PASSWORD, DB_NAME
   DATABASE_URL: Joi.string().optional().allow(''),
   DB_HOST: Joi.when(Joi.ref('DATABASE_URL'), {
     is: hasDatabaseUrl,

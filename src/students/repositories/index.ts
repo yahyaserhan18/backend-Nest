@@ -1,2 +1,2 @@
 export * from './student.repository.interface';
-export * from './student.repository';
+export * from './student.repository.prisma';
