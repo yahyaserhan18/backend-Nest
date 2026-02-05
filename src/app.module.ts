@@ -8,8 +8,8 @@ import { CommonModule } from './common/common.module';
 import { TraceIdMiddleware } from './middleware/trace-id.middleware';
 import { PrismaModule } from './prisma/prisma.module';
 import { StudentsModule } from './students/students.module';
-import { CoursesSeedService } from './courses/courses-seed.service';
-import { TeachersSeedService } from './teachers/teachers-seed.service';
+import { TeachersModule } from './teachers/teachers.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -26,15 +26,11 @@ import { TeachersSeedService } from './teachers/teachers-seed.service';
     PrismaModule,
     CommonModule,
     StudentsModule,
+    TeachersModule,
+    CoursesModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    TraceIdMiddleware,
-    TeachersSeedService,
-    CoursesSeedService,
-    AppSeedService,
-  ],
+  providers: [AppService, TraceIdMiddleware, AppSeedService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {
