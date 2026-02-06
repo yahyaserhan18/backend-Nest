@@ -555,3 +555,69 @@ src/
 - **Build/tests:** `npm run build`, `npm test`.
 
 ---
+---
+
+# Day 05 – Authentication (JWT, Registration, Role-Based Access)
+
+Summary of what was accomplished.
+
+---
+
+## 1) Authentication module
+
+- **AuthModule** – JWT-based auth using `@nestjs/jwt` and `@nestjs/passport` with a custom JWT strategy. Access and refresh tokens; refresh tokens stored hashed in the database (`User.refreshTokenHash`).
+- **Auth endpoints** – `POST /api/auth/register` (public), `POST /api/auth/login` (public), `POST /api/auth/refresh` (public), `POST /api/auth/logout` (protected), `GET /api/auth/me` (protected). Register and login return `{ user, tokens }` with `accessToken`, `refreshToken`, and `expiresIn`.
+- **User model** – Prisma `User` with `email`, `passwordHash`, `role` (enum: `TEACHER` | `STUDENT`), `isActive`, and optional `refreshTokenHash`. One-to-one with `Teacher` or `Student` (created on registration by role).
+
+---
+
+## 2) Registration and roles
+
+- **Registration** – Accepts `email`, `password`, and `role`. For `TEACHER`: requires `fullName`; creates a `Teacher` linked to the user. For `STUDENT`: requires `name`, `age`, `grade`; creates a `Student` linked to the user. Passwords hashed with bcrypt (rounds from `BCRYPT_ROUNDS`).
+- **Role-based access** – `@Roles(Role.TEACHER)` (or `Role.STUDENT`) plus `RolesGuard` restrict routes by `user.role` from the JWT payload. Use with `JwtAuthGuard` (or rely on the global guard).
+
+---
+
+## 3) Global JWT guard and public routes
+
+- **Global guard** – `JwtAuthGuard` is registered as `APP_GUARD` in `AppModule`, so all routes require a valid JWT by default.
+- **Public routes** – `@Public()` decorator marks routes that skip the JWT guard (register, login, refresh). Implemented via reflector metadata; guard checks for it before validating the token.
+
+---
+
+## 4) Configuration and security
+
+- **Env validation** (Joi) – `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` (min 16 chars), `JWT_ACCESS_EXPIRES_IN` (default `15m`), `JWT_REFRESH_EXPIRES_IN` (default `7d`), `BCRYPT_ROUNDS` (10–20, default 10).
+- **JWT payload** – Includes `sub` (userId), `email`, `role`, and optionally `teacherId` / `studentId` for use in guards and `@CurrentUser()`.
+
+---
+
+## 5) Project structure (Day 05 additions)
+
+```
+src/
+  auth/
+    auth.module.ts
+    auth.controller.ts
+    auth.service.ts
+    auth.types.ts
+    dto/ (register, login, refresh-token)
+    decorators/ (current-user, public, roles)
+    guards/ (jwt-auth.guard, roles.guard)
+    strategies/ (jwt.strategy.ts)
+  users/
+    users.module.ts
+    users.service.ts
+    ...
+prisma/schema.prisma   # User model, Role enum, refreshTokenHash
+```
+
+---
+
+## 6) Run & verify (Day 05)
+
+- **Env:** Set `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` (each ≥ 16 characters). Optional: `JWT_ACCESS_EXPIRES_IN`, `JWT_REFRESH_EXPIRES_IN`, `BCRYPT_ROUNDS`.
+- **Migrations:** Ensure User table and any auth-related columns exist (`npm run migration:deploy`).
+- **Endpoints:** Register → login → use `accessToken` in `Authorization: Bearer <token>` for `/api/auth/me` and other protected routes; use `refreshToken` at `POST /api/auth/refresh` to get new tokens; logout clears refresh token server-side.
+
+---
