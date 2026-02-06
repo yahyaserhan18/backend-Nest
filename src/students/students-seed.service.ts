@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
+import { Role } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { studentsSeedData } from './seed';
+
+const SEED_PASSWORD = 'SeedPassword1!';
 
 @Injectable()
 export class StudentsSeedService {
@@ -9,15 +13,28 @@ export class StudentsSeedService {
   async seed(): Promise<void> {
     const studentCount = await this.prisma.student.count();
     if (studentCount === 0) {
-      await this.prisma.student.createMany({
-        data: studentsSeedData.map((row) => ({
-          id: row.id,
-          name: row.name!,
-          age: row.age!,
-          grade: row.grade!,
-          isActive: row.isActive ?? true,
-        })),
-      });
+      const passwordHash = await bcrypt.hash(SEED_PASSWORD, 10);
+      for (const row of studentsSeedData) {
+        const email = `student-${row.id}@seed.local`;
+        const user = await this.prisma.user.create({
+          data: {
+            email,
+            passwordHash,
+            role: Role.STUDENT,
+            isActive: true,
+          },
+        });
+        await this.prisma.student.create({
+          data: {
+            id: row.id!,
+            userId: user.id,
+            name: row.name!,
+            age: row.age!,
+            grade: row.grade!,
+            isActive: row.isActive ?? true,
+          },
+        });
+      }
     }
     await this.seedCourseEnrollments();
   }

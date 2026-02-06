@@ -6,6 +6,7 @@ import { IStudentRepository } from './student.repository.interface';
 
 function toModel(row: {
   id: string;
+  userId: string;
   name: string;
   age: number;
   grade: number;
@@ -14,6 +15,7 @@ function toModel(row: {
 }): StudentModel {
   return {
     id: row.id,
+    userId: row.userId,
     name: row.name,
     age: row.age,
     grade: row.grade,
@@ -29,6 +31,7 @@ export class StudentRepositoryPrisma implements IStudentRepository {
   create(data: Partial<StudentModel>): StudentModel {
     return {
       id: (data.id as string) ?? '',
+      userId: data.userId ?? '',
       name: data.name ?? '',
       age: data.age ?? 0,
       grade: data.grade ?? 0,
@@ -39,6 +42,7 @@ export class StudentRepositoryPrisma implements IStudentRepository {
 
   async save(entity: StudentModel): Promise<StudentModel> {
     const payload: Prisma.StudentCreateInput = {
+      user: { connect: { id: entity.userId } },
       name: entity.name,
       age: entity.age,
       grade: entity.grade,
@@ -48,10 +52,10 @@ export class StudentRepositoryPrisma implements IStudentRepository {
       const updated = await this.prisma.student.update({
         where: { id: entity.id },
         data: {
-          name: payload.name,
-          age: payload.age,
-          grade: payload.grade,
-          isActive: payload.isActive,
+          name: entity.name,
+          age: entity.age,
+          grade: entity.grade,
+          isActive: entity.isActive,
         },
       });
       return toModel(updated);
@@ -69,6 +73,7 @@ export class StudentRepositoryPrisma implements IStudentRepository {
     const where = options?.where
       ? {
           ...(options.where.id && { id: options.where.id }),
+          ...(options.where.userId != null && { userId: options.where.userId }),
           ...(options.where.name != null && { name: options.where.name }),
           ...(options.where.age != null && { age: options.where.age }),
           ...(options.where.grade != null && { grade: options.where.grade }),
@@ -87,6 +92,7 @@ export class StudentRepositoryPrisma implements IStudentRepository {
   async findOneBy(criteria: Partial<StudentModel>): Promise<StudentModel | null> {
     const where: Prisma.StudentWhereInput = {};
     if (criteria.id != null) where.id = criteria.id;
+    if (criteria.userId != null) where.userId = criteria.userId;
     if (criteria.name != null) where.name = criteria.name;
     if (criteria.age != null) where.age = criteria.age;
     if (criteria.grade != null) where.grade = criteria.grade;
@@ -135,14 +141,18 @@ export class StudentRepositoryPrisma implements IStudentRepository {
     const count = await this.prisma.student.count();
     if (count > 0) return;
 
-    await this.prisma.student.createMany({
-      data: data.map((row) => ({
-        ...(row.id && { id: row.id }),
-        name: row.name!,
-        age: row.age!,
-        grade: row.grade!,
-        isActive: row.isActive ?? true,
-      })),
-    });
+    for (const row of data) {
+      if (!row.userId) throw new Error('seedIfEmpty requires userId on each row');
+      await this.prisma.student.create({
+        data: {
+          ...(row.id && { id: row.id }),
+          userId: row.userId,
+          name: row.name!,
+          age: row.age!,
+          grade: row.grade!,
+          isActive: row.isActive ?? true,
+        },
+      });
+    }
   }
 }

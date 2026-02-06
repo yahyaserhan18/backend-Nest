@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppSeedService } from './app-seed.service';
 import { AppService } from './app.service';
@@ -10,6 +11,9 @@ import { PrismaModule } from './prisma/prisma.module';
 import { StudentsModule } from './students/students.module';
 import { TeachersModule } from './teachers/teachers.module';
 import { CoursesModule } from './courses/courses.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 @Module({
   imports: [
@@ -25,12 +29,19 @@ import { CoursesModule } from './courses/courses.module';
     }),
     PrismaModule,
     CommonModule,
+    UsersModule,
+    AuthModule,
     StudentsModule,
     TeachersModule,
     CoursesModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TraceIdMiddleware, AppSeedService],
+  providers: [
+    AppService,
+    TraceIdMiddleware,
+    AppSeedService,
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): void {

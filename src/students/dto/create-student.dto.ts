@@ -1,5 +1,6 @@
 import {
   IsBoolean,
+  IsEmail,
   IsInt,
   IsString,
   Max,
@@ -8,6 +9,13 @@ import {
 } from 'class-validator';
 
 export class CreateStudentDto {
+  @IsEmail()
+  email: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  password: string;
+
   @IsString()
   @MinLength(2)
   name: string;

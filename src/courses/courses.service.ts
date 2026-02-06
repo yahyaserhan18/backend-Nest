@@ -92,11 +92,12 @@ export class CoursesService {
     );
   }
 
-  async create(dto: CreateCourseDto): Promise<CourseResponseDto> {
+  async create(dto: CreateCourseDto, currentTeacherId?: string): Promise<CourseResponseDto> {
+    const teacherId = currentTeacherId ?? dto.teacherId;
     const model = this.repository.create({
       title: dto.title,
       code: dto.code,
-      teacherId: dto.teacherId,
+      teacherId,
     });
     const saved = await this.repository.save(model);
     return toCourseResponseDto(saved);

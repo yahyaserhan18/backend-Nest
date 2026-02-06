@@ -7,8 +7,30 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  TEACHER
+  STUDENT
+}
+
+model User {
+  id             String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  email          String    @unique @db.VarChar(255)
+  passwordHash   String    @map("password_hash") @db.VarChar(255)
+  role           Role
+  isActive       Boolean   @default(true) @map("is_active") @db.Boolean
+  refreshTokenHash String? @map("refresh_token_hash") @db.VarChar(255)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  teacher        Teacher?
+  student        Student?
+
+  @@map("users")
+}
+
 model Student {
   id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   name      String   @db.VarChar(255)
   age       Int
   grade     Int
@@ -21,6 +43,8 @@ model Student {
 
 model Teacher {
   id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   fullName  String   @db.VarChar(255)
   email     String   @unique @db.VarChar(255)
   createdAt DateTime @default(now()) @db.Timestamptz(6)

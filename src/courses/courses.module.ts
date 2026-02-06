@@ -6,6 +6,7 @@ import {
 import { CoursesController } from './courses.controller';
 import { CoursesSeedService } from './courses-seed.service';
 import { CoursesService } from './courses.service';
+import { CourseOwnerGuard } from './guards/course-owner.guard';
 
 @Module({
   controllers: [CoursesController],
@@ -16,6 +17,7 @@ import { CoursesService } from './courses.service';
     },
     CoursesService,
     CoursesSeedService,
+    CourseOwnerGuard,
   ],
   exports: [COURSE_REPOSITORY, CoursesSeedService],
 })

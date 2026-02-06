@@ -4,6 +4,7 @@
  */
 export type StudentModel = {
   id: string;
+  userId: string;
   name: string;
   age: number;
   grade: number;

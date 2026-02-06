@@ -9,12 +9,14 @@ import {
 
 function toModel(row: {
   id: string;
+  userId: string;
   fullName: string;
   email: string;
   createdAt: Date;
 }): TeacherModel {
   return {
     id: row.id,
+    userId: row.userId,
     fullName: row.fullName,
     email: row.email,
     createdAt: row.createdAt,
@@ -55,6 +57,7 @@ export class TeacherRepositoryPrisma implements ITeacherRepository {
   async findOneBy(criteria: Partial<TeacherModel>): Promise<TeacherModel | null> {
     const where: Prisma.TeacherWhereInput = {};
     if (criteria.id != null) where.id = criteria.id;
+    if (criteria.userId != null) where.userId = criteria.userId;
     if (criteria.email != null) where.email = criteria.email;
     if (criteria.fullName != null) where.fullName = criteria.fullName;
     const row = await this.prisma.teacher.findFirst({ where });
@@ -64,6 +67,7 @@ export class TeacherRepositoryPrisma implements ITeacherRepository {
   create(data: Partial<TeacherModel>): TeacherModel {
     return {
       id: (data.id as string) ?? '',
+      userId: data.userId ?? '',
       fullName: data.fullName ?? '',
       email: data.email ?? '',
       createdAt: data.createdAt ?? new Date(),
@@ -72,6 +76,7 @@ export class TeacherRepositoryPrisma implements ITeacherRepository {
 
   async save(entity: TeacherModel): Promise<TeacherModel> {
     const payload = {
+      userId: entity.userId,
       fullName: entity.fullName,
       email: entity.email,
     };

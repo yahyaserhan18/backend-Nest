@@ -8,11 +8,18 @@ import {
   ParseUUIDPipe,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
+import { Role } from '@prisma/client';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { CourseListQueryDto } from './dto/course-list-query.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { CoursesService } from './courses.service';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/auth.types';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { CourseOwnerGuard } from './guards/course-owner.guard';
 
 @Controller('courses')
 export class CoursesController {
@@ -31,11 +38,18 @@ export class CoursesController {
   }
 
   @Post()
-  create(@Body() dto: CreateCourseDto) {
-    return this.coursesService.create(dto);
+  @UseGuards(RolesGuard)
+  @Roles(Role.TEACHER)
+  create(
+    @Body() dto: CreateCourseDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
+    return this.coursesService.create(dto, user.teacherId!);
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard, CourseOwnerGuard)
+  @Roles(Role.TEACHER)
   update(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() dto: UpdateCourseDto,
@@ -44,13 +58,17 @@ export class CoursesController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard, CourseOwnerGuard)
+  @Roles(Role.TEACHER)
   async remove(@Param('id', new ParseUUIDPipe({ version: '4' })) id: string) {
     await this.coursesService.remove(id);
     return { deleted: true };
   }
 
-  /** POST /api/courses/:id/students/:studentId - idempotent enroll */
+  /** POST /api/courses/:id/students/:studentId - idempotent enroll (teacher owner only) */
   @Post(':id/students/:studentId')
+  @UseGuards(RolesGuard, CourseOwnerGuard)
+  @Roles(Role.TEACHER)
   async enrollStudent(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Param('studentId', new ParseUUIDPipe({ version: '4' })) studentId: string,
@@ -59,8 +77,10 @@ export class CoursesController {
     return { enrolled: true };
   }
 
-  /** DELETE /api/courses/:id/students/:studentId - idempotent unenroll */
+  /** DELETE /api/courses/:id/students/:studentId - idempotent unenroll (teacher owner only) */
   @Delete(':id/students/:studentId')
+  @UseGuards(RolesGuard, CourseOwnerGuard)
+  @Roles(Role.TEACHER)
   async unenrollStudent(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Param('studentId', new ParseUUIDPipe({ version: '4' })) studentId: string,

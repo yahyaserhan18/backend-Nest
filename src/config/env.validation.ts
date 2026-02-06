@@ -51,4 +51,17 @@ export const envValidationSchema = Joi.object({
 
   // Optional
   RABBITMQ_URL: Joi.string().optional().allow('').empty(''),
+
+  // Auth: JWT and bcrypt
+  JWT_ACCESS_SECRET: Joi.string().min(16).required().messages({
+    'string.min': 'JWT_ACCESS_SECRET must be at least 16 characters',
+    'any.required': 'JWT_ACCESS_SECRET is required',
+  }),
+  JWT_REFRESH_SECRET: Joi.string().min(16).required().messages({
+    'string.min': 'JWT_REFRESH_SECRET must be at least 16 characters',
+    'any.required': 'JWT_REFRESH_SECRET is required',
+  }),
+  JWT_ACCESS_EXPIRES_IN: Joi.string().default('15m'),
+  JWT_REFRESH_EXPIRES_IN: Joi.string().default('7d'),
+  BCRYPT_ROUNDS: Joi.number().integer().min(10).max(20).default(10),
 });

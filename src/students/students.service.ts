@@ -1,4 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Role } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 import { TraceLoggerService } from '../common/trace-logger.service';
 import { CreateStudentDto } from './dto/create-student.dto';
 import { CourseResponseDto } from './dto/course-response.dto';
@@ -15,10 +18,22 @@ export class StudentsService {
     private readonly repository: IStudentRepository,
     private readonly traceLogger: TraceLoggerService,
     private readonly prisma: PrismaService,
+    private readonly config: ConfigService,
   ) {}
 
   async create(dto: CreateStudentDto): Promise<StudentResponseDto> {
+    const rounds = this.config.get<number>('BCRYPT_ROUNDS', 10);
+    const passwordHash = await bcrypt.hash(dto.password, rounds);
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email.toLowerCase(),
+        passwordHash,
+        role: Role.STUDENT,
+        isActive: true,
+      },
+    });
     const model = this.repository.create({
+      userId: user.id,
       name: dto.name,
       age: dto.age,
       grade: dto.grade,

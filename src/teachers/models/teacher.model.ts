@@ -3,6 +3,7 @@
  */
 export type TeacherModel = {
   id: string;
+  userId: string;
   fullName: string;
   email: string;
   createdAt: Date;

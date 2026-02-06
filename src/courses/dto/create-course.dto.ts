@@ -1,4 +1,4 @@
-import { IsString, IsUUID, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MinLength } from 'class-validator';
 
 export class CreateCourseDto {
   @IsString()
@@ -9,6 +9,8 @@ export class CreateCourseDto {
   @MinLength(2)
   code: string;
 
+  /** Ignored when creating as authenticated teacher (uses current user's teacherId). */
+  @IsOptional()
   @IsUUID('4')
-  teacherId: string;
+  teacherId?: string;
 }
