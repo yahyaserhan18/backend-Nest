@@ -434,7 +434,7 @@ Summary of changes and features added.
 - **Replaced TypeORM** with **Prisma 7**: `prisma/schema.prisma`, `prisma.config.ts`, `@prisma/adapter-pg`.
 - **PrismaModule + PrismaService** (`src/prisma/`): global module; builds `DATABASE_URL` from env (see §2); connects/disconnects in lifecycle hooks.
 - **Student data access**: `IStudentRepository` implemented by `StudentRepositoryPrisma`; students service and API behavior unchanged (same DTOs, routes, responses).
-- **Migrations**: Prisma migrations in `prisma/migrations/`; `npm run migration:deploy` (or `migration:dev`). Scripts use `scripts/ensure-database-url.js` and `scripts/migrate-deploy.js` so CLI works with `DB_*` vars.
+- **Migrations**: Prisma migrations in `prisma/migrations/`; `npm run migration:deploy` (or `migration:dev`). Scripts use `scripts/prisma-generate.js` and `scripts/migrate-deploy.js` so CLI works with `DB_*` vars.
 
 ---
 

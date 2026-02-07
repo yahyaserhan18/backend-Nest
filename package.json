@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "node scripts/ensure-database-url.js generate && nest build",
+    "build": "node scripts/prisma-generate.js generate && nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -18,10 +18,16 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "prisma:generate": "node scripts/ensure-database-url.js generate",
-    "prisma:seed": "npx prisma db seed",
+    "db:migrate": "node scripts/migrate-deploy.js",
+    "db:seed": "node scripts/run-seed.js",
+    "db:verify": "node scripts/verify-db.js",
+    "db:setup": "node scripts/migrate-deploy.js && node scripts/run-seed.js && node scripts/verify-db.js",
+    "prisma:generate": "node scripts/prisma-generate.js generate",
+    "prisma:seed": "npm run db:seed",
     "prisma:reset": "npx prisma migrate reset",
-    "migration:deploy": "node scripts/migrate-deploy.js",
+    "prisma:migrate:deploy": "npm run db:migrate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "migration:deploy": "npm run db:migrate",
     "migration:dev": "prisma migrate dev"
   },
   "prisma": {
